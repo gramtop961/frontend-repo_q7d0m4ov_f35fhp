@@ -4,6 +4,20 @@ import OffersBanner from "./components/OffersBanner";
 import Menu from "./components/Menu";
 import CartDrawer from "./components/CartDrawer";
 
+function getBackendBase() {
+  const envBase = import.meta.env.VITE_BACKEND_URL;
+  if (envBase && typeof envBase === "string" && envBase.trim().length > 0) {
+    return envBase.replace(/\/$/, "");
+  }
+  try {
+    const url = new URL(window.location.href);
+    const host = url.host.replace(/:3000$/, ":8000");
+    return `${url.protocol}//${host}`;
+  } catch {
+    return "";
+  }
+}
+
 function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [items, setItems] = useState([]);
@@ -11,7 +25,6 @@ function App() {
   const count = useMemo(() => items.reduce((n, it) => n + it.quantity, 0), [items]);
 
   const addToCart = (item) => {
-    // If item exists, increase quantity
     const idx = items.findIndex((it) => it.name === item.name);
     if (idx >= 0) {
       const next = items.slice();
@@ -23,7 +36,7 @@ function App() {
   };
 
   const submitOrder = async ({ name, phone, method, note, items, subtotal, discount, total }) => {
-    const base = import.meta.env.VITE_BACKEND_URL;
+    const base = getBackendBase();
     const body = {
       customer_name: name,
       contact_number: phone,
